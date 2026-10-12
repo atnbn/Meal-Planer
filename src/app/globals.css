@@ -1,26 +1,434 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ==========================================================================
+   Design System – Tokens
+   Semantic tokens first, raw scales second. Components should consume the
+   semantic layer (surface, fg, line, brand) so the palette stays swappable.
+   ========================================================================== */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@theme {
+  /* Typography */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --text-display: clamp(1.875rem, 1.35rem + 1.8vw, 2.75rem);
+  --text-display--line-height: 1.08;
+  --text-display--letter-spacing: -0.035em;
+  --text-display--font-weight: 650;
+
+  /* Brand – iris (indigo/violet), tuned in OKLCH for even perceptual steps */
+  --color-brand-50: oklch(0.97 0.018 280);
+  --color-brand-100: oklch(0.94 0.035 280);
+  --color-brand-200: oklch(0.885 0.07 280);
+  --color-brand-300: oklch(0.8 0.115 280);
+  --color-brand-400: oklch(0.7 0.165 280);
+  --color-brand-500: oklch(0.6 0.2 280);
+  --color-brand-600: oklch(0.52 0.21 280);
+  --color-brand-700: oklch(0.45 0.19 280);
+  --color-brand-800: oklch(0.38 0.15 280);
+  --color-brand-900: oklch(0.31 0.11 280);
+  --color-brand-950: oklch(0.22 0.08 280);
+
+  /* Brand roles – use these for filled surfaces so both themes stay legible */
+  --color-brand-solid: oklch(0.52 0.21 280);
+  --color-brand-solid-hover: oklch(0.45 0.19 280);
+  --color-on-brand: oklch(1 0 0);
+  --color-scrim: oklch(0.22 0.08 280 / 0.4);
+
+  /* Accent – warm apricot, used sparingly for highlights */
+  --color-accent-100: oklch(0.95 0.04 65);
+  --color-accent-400: oklch(0.8 0.14 60);
+  --color-accent-500: oklch(0.72 0.17 50);
+  --color-accent-700: oklch(0.5 0.13 50);
+
+  /* Semantic surfaces & text */
+  --color-canvas: oklch(0.985 0.004 280);
+  --color-surface: oklch(1 0 0);
+  --color-surface-muted: oklch(0.97 0.006 280);
+  --color-surface-sunken: oklch(0.955 0.008 280);
+  --color-line: oklch(0.91 0.01 280);
+  --color-line-strong: oklch(0.84 0.015 280);
+  --color-fg: oklch(0.2 0.025 280);
+  --color-fg-muted: oklch(0.42 0.025 280);
+  --color-fg-subtle: oklch(0.52 0.02 280);
+
+  /* Feedback (all ≥ 4.5:1 on their -soft backgrounds) */
+  --color-success: oklch(0.5 0.13 155);
+  --color-success-soft: oklch(0.96 0.04 155);
+  --color-warning: oklch(0.5 0.12 70);
+  --color-warning-soft: oklch(0.97 0.05 85);
+  --color-danger: oklch(0.52 0.19 25);
+  --color-danger-soft: oklch(0.97 0.025 25);
+
+  /* Macro colours (data-viz) */
+  --color-macro-protein: oklch(0.6 0.2 280);
+  --color-macro-carbs: oklch(0.75 0.15 65);
+  --color-macro-fat: oklch(0.68 0.13 175);
+
+  /* Radius */
+  --radius-control: 0.875rem;
+  --radius-card: 1.25rem;
+  --radius-panel: 1.75rem;
+
+  /* Elevation */
+  --shadow-xs: 0 1px 2px oklch(0.2 0.03 280 / 0.06);
+  --shadow-card:
+    0 1px 2px oklch(0.2 0.03 280 / 0.04), 0 8px 24px -8px oklch(0.2 0.03 280 / 0.1);
+  --shadow-panel:
+    0 1px 1px oklch(0.2 0.03 280 / 0.03), 0 24px 64px -24px oklch(0.25 0.06 280 / 0.22);
+  --shadow-brand: 0 10px 30px -10px oklch(0.52 0.21 280 / 0.55);
+  --shadow-float:
+    0 1px 2px oklch(0.2 0.03 280 / 0.05), 0 30px 60px -20px oklch(0.25 0.08 280 / 0.28);
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-step-in-forward: step-in-forward 520ms var(--ease-out-expo) both;
+  --animate-step-in-back: step-in-back 520ms var(--ease-out-expo) both;
+  --animate-fade-up: fade-up 600ms var(--ease-out-expo) both;
+  --animate-pop: pop 320ms var(--ease-spring) both;
+  --animate-shake: shake 380ms ease-in-out;
+  --animate-shimmer: shimmer 1.8s linear infinite;
+  --animate-indeterminate: indeterminate 1.6s var(--ease-out-expo) infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-dialog-in: dialog-in 320ms var(--ease-out-expo) both;
+  --animate-fade-in: fade-in 240ms ease-out both;
+  --animate-marquee: marquee 40s linear infinite;
+
+  @keyframes step-in-forward {
+    from {
+      opacity: 0;
+      transform: translate3d(24px, 0, 0);
+      filter: blur(4px);
+    }
+  }
+  @keyframes step-in-back {
+    from {
+      opacity: 0;
+      transform: translate3d(-24px, 0, 0);
+      filter: blur(4px);
+    }
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 12px, 0);
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+  }
+  @keyframes shake {
+    20%,
+    60% {
+      transform: translateX(-4px);
+    }
+    40%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 12px, 0) scale(0.96);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes float {
+    50% {
+      transform: translate3d(0, -10px, 0);
+    }
+  }
+  @keyframes marquee {
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+  @keyframes indeterminate {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: translateX(250%);
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ==========================================================================
+   Dark theme
+   The inline script in layout.tsx sets data-theme on <html> before first
+   paint. Only token values change here – components stay theme-agnostic.
+   Brand scale is inverted Radix-style: 50–300 become tinted surfaces,
+   700–950 become light foregrounds, so `text-brand-700` on `bg-brand-50`
+   keeps working in both themes.
+   ========================================================================== */
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@layer base {
+  [data-theme="dark"] {
+    color-scheme: dark;
+
+    --color-brand-50: oklch(0.235 0.045 280);
+    --color-brand-100: oklch(0.27 0.07 280);
+    --color-brand-200: oklch(0.33 0.1 280);
+    --color-brand-300: oklch(0.42 0.14 280);
+    --color-brand-400: oklch(0.56 0.18 280);
+    --color-brand-500: oklch(0.68 0.16 280);
+    --color-brand-600: oklch(0.6 0.19 280);
+    --color-brand-700: oklch(0.8 0.11 280);
+    --color-brand-800: oklch(0.86 0.08 280);
+    --color-brand-900: oklch(0.91 0.05 280);
+    --color-brand-950: oklch(0.95 0.03 280);
+
+    --color-brand-solid: oklch(0.5 0.2 280);
+    --color-brand-solid-hover: oklch(0.55 0.2 280);
+    --color-scrim: oklch(0.08 0.02 280 / 0.6);
+
+    --color-accent-100: oklch(0.3 0.06 55);
+    --color-accent-400: oklch(0.78 0.14 60);
+    --color-accent-500: oklch(0.76 0.15 55);
+    --color-accent-700: oklch(0.85 0.1 60);
+
+    --color-canvas: oklch(0.155 0.012 280);
+    --color-surface: oklch(0.195 0.015 280);
+    --color-surface-muted: oklch(0.225 0.017 280);
+    --color-surface-sunken: oklch(0.17 0.013 280);
+    --color-line: oklch(0.29 0.018 280);
+    --color-line-strong: oklch(0.37 0.02 280);
+    --color-fg: oklch(0.965 0.005 280);
+    --color-fg-muted: oklch(0.79 0.015 280);
+    --color-fg-subtle: oklch(0.67 0.015 280);
+
+    --color-success: oklch(0.8 0.14 155);
+    --color-success-soft: oklch(0.27 0.05 155);
+    --color-warning: oklch(0.84 0.13 85);
+    --color-warning-soft: oklch(0.28 0.05 75);
+    --color-danger: oklch(0.75 0.16 25);
+    --color-danger-soft: oklch(0.27 0.06 25);
+
+    --color-macro-protein: oklch(0.68 0.17 280);
+    --color-macro-carbs: oklch(0.8 0.14 70);
+    --color-macro-fat: oklch(0.76 0.12 175);
+
+    --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.4);
+    --shadow-card: 0 1px 2px oklch(0 0 0 / 0.35), 0 8px 24px -8px oklch(0 0 0 / 0.55);
+    --shadow-panel:
+      0 0 0 1px oklch(1 0 0 / 0.04), 0 24px 64px -24px oklch(0 0 0 / 0.7);
+    --shadow-brand: 0 10px 30px -10px oklch(0.55 0.22 280 / 0.6);
+    --shadow-float: 0 0 0 1px oklch(1 0 0 / 0.04), 0 30px 60px -20px oklch(0 0 0 / 0.7);
+  }
+
+  /* Suppress colour transitions for the single frame in which the theme flips */
+  [data-theme-switching] *,
+  [data-theme-switching] *::before,
+  [data-theme-switching] *::after {
+    transition: none !important;
+  }
+
+  /* Circular reveal driven by ThemeToggle via the View Transitions API */
+  html[data-theme-reveal]::view-transition-old(root),
+  html[data-theme-reveal]::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-padding-top: 5rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background: var(--color-canvas);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--color-brand-200);
+    color: var(--color-brand-950);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 3px;
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+/* Visible focus ring for custom controls whose native input is visually hidden */
+@utility focus-ring-within {
+  &:has(:focus-visible) {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 3px;
+  }
+}
+
+@utility range-brand {
+  appearance: none;
+  height: 1.75rem;
+  background: transparent;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: linear-gradient(
+      to right,
+      var(--color-brand-500) 0%,
+      var(--color-brand-500) var(--range-progress, 50%),
+      var(--color-brand-100) var(--range-progress, 50%)
+    );
+  }
+  &::-moz-range-track {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--color-brand-100);
+  }
+  &::-moz-range-progress {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--color-brand-500);
+  }
+  &::-webkit-slider-thumb {
+    appearance: none;
+    margin-top: -0.5rem;
+    height: 1.5rem;
+    width: 1.5rem;
+    border-radius: 999px;
+    background: var(--color-surface);
+    border: 2px solid var(--color-brand-600);
+    box-shadow: var(--shadow-brand);
+    transition: transform 200ms var(--ease-spring);
+  }
+  &::-moz-range-thumb {
+    height: 1.25rem;
+    width: 1.25rem;
+    border-radius: 999px;
+    background: var(--color-surface);
+    border: 2px solid var(--color-brand-600);
+    box-shadow: var(--shadow-brand);
+  }
+  &:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+  }
+  &:focus-visible {
+    outline: none;
+  }
+  &:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 3px;
+  }
+  &:focus-visible::-moz-range-thumb {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 3px;
+  }
+}
+
+/* Scroll-driven reveal – progressive enhancement, no JS required */
+@utility reveal {
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 25%;
+    }
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0) scale(0.98);
+  }
+}
+
+/* Sticky header that gains its surface only once the page scrolls (falls back to always-on) */
+@utility scroll-elevate {
+  @supports (animation-timeline: scroll()) {
+    animation: elevate linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 72px;
+  }
+}
+
+@keyframes elevate {
+  from {
+    background-color: transparent;
+    border-color: transparent;
+    backdrop-filter: none;
+  }
+}
+
+/* Subtle dotted texture used behind hero / onboarding */
+@utility bg-dots {
+  background-image: radial-gradient(
+    color-mix(in oklch, var(--color-fg) 9%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+}
+
+@utility text-gradient-brand {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-brand-600) 10%,
+    var(--color-brand-500) 55%,
+    var(--color-accent-700) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
